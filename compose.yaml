@@ -1,0 +1,69 @@
+name: lalbag
+
+services:
+  # PostgreSQL database for local development
+  postgres:
+    image: postgres:17
+    command: "-d 1"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=main
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    stop_grace_period: 30s
+
+  # Neon Proxy - enables Neon serverless driver with local PostgreSQL
+  # To work offline, add an entry to your system's hosts file to map db.localtest.me to 127.0.0.1
+  # See: https://neon.com/guides/local-development-with-neon
+  neon-proxy:
+    image: ghcr.io/timowilhelm/local-neon-http-proxy:main
+    environment:
+      - PG_CONNECTION_STRING=postgres://postgres:postgres@postgres:5432/main
+    ports:
+      - "4444:4444"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # MinIO object storage for local development
+  minio:
+    image: quay.io/minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - default
+
+  # MinIO CLI to initialize buckets and set permissions
+  minio-mc:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 5;
+      mc alias set local http://minio:9000 minio minio123;
+      mc ls local/uploads || mc mb local/uploads;
+      mc ls local/images || mc mb local/images;
+      mc anonymous set public local/images;
+      "
+    networks:
+      - default
+
+volumes:
+  db_data:
+  minio_data:

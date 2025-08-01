@@ -7,10 +7,7 @@
 	"name": "lalbag-api",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-08-01",
-	"assets": {
-		"binding": "ASSETS",
-		"directory": "./public",
-	},
+
 	"observability": {
 		"enabled": true,
 	},

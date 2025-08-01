@@ -8,12 +8,12 @@
 	<body>
 		<h1 id="heading"></h1>
 		<script>
-			fetch('/message')
+			fetch("/message")
 				.then((resp) => resp.text())
 				.then((text) => {
-					const h1 = document.getElementById('heading');
-					h1.textContent = text;
-				});
+					const h1 = document.getElementById("heading")
+					h1.textContent = text
+				})
 		</script>
 	</body>
 </html>

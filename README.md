@@ -78,6 +78,10 @@ Deploy to Cloudflare Workers:
 pnpm deploy
 ```
 
+## API Endpoints
+
+- `GET /health` - Health check endpoint
+
 ## Services (Local Development)
 
 - **API**: http://localhost:8787
@@ -85,13 +89,59 @@ pnpm deploy
 - **MinIO Console**: http://localhost:9001
 - **MinIO API**: http://localhost:9000
 
+## Development Patterns
+
+### Response Utilities
+
+Use the `res.*` namespace for consistent API responses:
+
+```typescript
+import { res } from "@/utils/response"
+
+// Success responses
+return res.ok(c, { user: data })
+return res.created(c, { id: 123 }, "User created")
+return res.noContent(c)
+
+// Error responses
+return res.badRequest(c, "Invalid input", { field: "email" })
+return res.unauthorized(c)
+return res.notFound(c, "User not found")
+return res.internalError(c)
+
+// Paginated responses
+return res.paginated(c, users, { page: 1, limit: 10, total: 100, totalPages: 10 })
+```
+
+### Import Aliases
+
+Use `@/*` aliases for clean, maintainable imports:
+
+```typescript
+// ✅ Use aliases
+import { res } from "@/utils/response"
+import { UserHandler } from "@/handlers/user"
+
+// ❌ Avoid relative paths
+import { res } from "../utils/response"
+```
+
 ## Project Structure
 
 ```
 src/
 ├── index.ts         # Main application entry point
+├── routes.ts        # Route registration and organization
 ├── handlers/        # Route handlers and business logic
+│   └── health.ts    # Health check handler
 ├── adapters/        # External service adapters
 ├── db/              # Database schema and utilities
 └── utils/           # Shared utilities
+    └── response.ts  # Type-safe response helpers (res.*)
 ```
+
+### Key Files
+
+- **`src/utils/response.ts`**: Unified response utilities with 12 methods covering all HTTP patterns
+- **`tsconfig.json`**: Path aliases configuration (`@/*` → `src/*`)
+- **`src/routes.ts`**: Centralized route registration system

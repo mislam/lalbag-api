@@ -1,147 +1,113 @@
 # Lalbag API
 
-A Hono-based API running on Cloudflare Workers with PostgreSQL database support via Neon serverless driver.
+Modern TypeScript-first marketplace API built with Hono v4.8.10 for Cloudflare Workers. Targets ~10ms cold starts with scalable, low-maintenance architecture serving Expo (React Native) and SvelteKit frontends.
 
-## Features
+## Tech Stack
 
-- **Hono Framework**: Fast, lightweight web framework for Cloudflare Workers
-- **Database**: PostgreSQL with Drizzle ORM
-- **Local Development**: Docker Compose setup with PostgreSQL and MinIO
-- **Neon Proxy**: Enables Neon serverless driver for local development
-- **Object Storage**: MinIO for local file storage development
+- **Runtime**: Cloudflare Workers
+- **Framework**: Hono v4.8.10 (fast, lightweight)
+- **Database**: Neon Postgres with Drizzle ORM v0.44.4 + @neondatabase/serverless v1.0.1 _(planned)_
+- **Authentication**: SMS OTP using [Bulk SMS BD](docs/sms-api.md) _(planned)_
+- **Local Development**: Docker Compose (PostgreSQL + MinIO)
 
-## Prerequisites
+## Architecture Goals
 
-- Node.js 18+
-- pnpm
-- Docker and Docker Compose
-- Cloudflare account with Workers enabled
-
-## Environment Setup
-
-1. Copy the environment variables:
-
-   ```bash
-   cp .dev.vars.example .dev.vars
-   ```
-
-2. For local development with Neon proxy, add this to your `/etc/hosts` file:
-   ```
-   127.0.0.1 db.localtest.me
-   ```
+- **Performance**: ~10ms cold starts on Cloudflare Workers
+- **Scalability**: Marketplace features (users, products, orders)
+- **Maintainability**: Concise, developer-friendly code for small teams
+- **Type Safety**: TypeScript-first with minimal boilerplate
+- **JSON-Centric**: Consistent response patterns
 
 ## Development
 
-Start local services and development server:
-
 ```bash
-pnpm dev:up # starts docker containers and dev server
-# or
-pnpm dev    # starts dev server only
-```
+# Start local services + dev server
+pnpm dev:up
 
-Stop local services:
+# Dev server only
+pnpm dev
 
-```bash
+# Stop services
 pnpm dev:down
+
+# Database operations
+pnpm db:push     # Push schema changes
+pnpm db:admin    # Open Drizzle Studio
+
+# Code maintenance
+pnpm format      # Format code
+pnpm cf-typegen  # Generate Cloudflare types
+pnpm deploy      # Deploy to Workers
 ```
 
-Push schema changes to database:
+## Environment Setup
 
-```bash
-pnpm db:push
-```
+1. Copy environment variables: `cp .dev.vars.example .dev.vars`
+2. Add to `/etc/hosts` for Neon proxy: `127.0.0.1 db.localtest.me`
 
-Open Drizzle Studio (database admin UI):
-
-```bash
-pnpm db:admin
-```
-
-Generate Cloudflare Worker types:
-
-```bash
-pnpm cf-typegen
-```
-
-Format code:
-
-```bash
-pnpm format
-```
-
-## Deployment
-
-Deploy to Cloudflare Workers:
-
-```bash
-pnpm deploy
-```
-
-## API Endpoints
-
-- `GET /health` - Health check endpoint
-
-## Services (Local Development)
+## Local Services
 
 - **API**: http://localhost:8787
 - **PostgreSQL**: localhost:5432
 - **MinIO Console**: http://localhost:9001
 - **MinIO API**: http://localhost:9000
 
-## Development Patterns
+## Core Patterns
 
-### Response Utilities
+- **Response Utilities**: JSON-centric `res.*` namespace with consistent structure
+  - Success: `{ ok: true, data, message?, meta? }`
+  - Error: `{ ok: false, error, code?, details? }`
+- **Routing**: Centralized in `src/routes.ts` with handlers from `src/handlers`
+- **Imports**: Use `@/*` aliases (e.g., `import { res } from "@/utils/response"`)
 
-Use the `res.*` namespace for consistent API responses:
-
-```typescript
-import { res } from "@/utils/response"
-
-// Success responses
-return res.ok(c, { user: data })
-return res.created(c, { id: 123 }, "User created")
-return res.noContent(c)
-
-// Error responses
-return res.badRequest(c, "Invalid input", { field: "email" })
-return res.unauthorized(c)
-return res.notFound(c, "User not found")
-return res.internalError(c)
-
-// Paginated responses
-return res.paginated(c, users, { page: 1, limit: 10, total: 100, totalPages: 10 })
-```
-
-### Import Aliases
-
-Use `@/*` aliases for clean, maintainable imports:
-
-```typescript
-// ✅ Use aliases
-import { res } from "@/utils/response"
-import { UserHandler } from "@/handlers/user"
-
-// ❌ Avoid relative paths
-import { res } from "../utils/response"
-```
+> See [Development Guide](docs/development.md) for detailed patterns and examples.
 
 ## Project Structure
 
 ```
 src/
-├── index.ts         # Main application entry point
-├── routes.ts        # Route registration and organization
-├── handlers/        # Route handlers and business logic
-│   └── health.ts    # Health check handler
-├── adapters/        # External service adapters
-├── db/              # Database schema and utilities
-└── utils/           # Shared utilities
-    └── response.ts  # Type-safe response helpers (res.*)
+├── index.ts           # Application entry point
+├── routes.ts          # Route registration
+├── handlers/          # Business logic and route handlers
+│   └── health.ts      # Health check handler
+├── utils/             # Shared utilities
+│   └── response.ts    # JSON response helpers (res.*)
+├── adapters/          # External services (planned)
+│   └── database.ts    # Placeholder for DB adapter
+└── db/                # Database schema (planned)
+    └── schema.ts      # Placeholder for schema
 ```
 
-### Key Files
+## API Context
 
-- **`src/utils/response.ts`**: Unified response utilities with 12 methods covering all HTTP patterns
-- **`tsconfig.json`**: Path aliases configuration (`@/*` → `src/*`)
-- **`src/routes.ts`**: Centralized route registration system
+This marketplace API will serve:
+
+- **Frontend**: Expo (React Native) mobile app _(planned)_
+- **Admin**: SvelteKit web dashboard _(planned)_
+- **Authentication**: SMS OTP flow _(planned)_
+- **Core Features**: Users, products, orders, marketplace functionality _(planned)_
+
+**Currently implemented**: Health check endpoint at `/health`
+
+## Implementation Status
+
+✅ **Working**:
+
+- Hono framework setup with Cloudflare Workers
+- Response utilities (`res.*` namespace)
+- Route registration system
+- Health check endpoint (`/health`)
+- Import aliases (`@/*`)
+
+🚧 **Planned**:
+
+- Database integration (Neon + Drizzle)
+- SMS OTP authentication
+- User management
+- Marketplace features (products, orders)
+- Frontend integration
+
+## Documentation
+
+- [SMS API Integration](docs/sms-api.md) - Bulk SMS BD provider details
+- [Development Guide](docs/development.md) - Detailed patterns and examples

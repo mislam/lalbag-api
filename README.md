@@ -6,7 +6,7 @@ Modern TypeScript-first marketplace API built with Hono v4.8.10 for Cloudflare W
 
 - **Runtime**: Cloudflare Workers
 - **Framework**: Hono v4.8.10 (fast, lightweight)
-- **Database**: Neon Postgres with Drizzle ORM v0.44.4 + @neondatabase/serverless v1.0.1 _(planned)_
+- **Database**: Neon Postgres with Drizzle ORM v0.44.4 + @neondatabase/serverless v1.0.1
 - **Authentication**: SMS OTP using [Bulk SMS BD](docs/sms-api.md) _(planned)_
 - **Local Development**: Docker Compose (PostgreSQL + MinIO)
 
@@ -69,13 +69,14 @@ src/
 ├── index.ts           # Application entry point
 ├── routes.ts          # Route registration
 ├── handlers/          # Business logic and route handlers
-│   └── health.ts      # Health check handler
+│   ├── health.ts      # Health check handler with DB connectivity
+│   └── error.ts       # Global error handlers
 ├── utils/             # Shared utilities
 │   └── response.ts    # JSON response helpers (res.*)
-├── adapters/          # External services (planned)
-│   └── database.ts    # Placeholder for DB adapter
-└── db/                # Database schema (planned)
-    └── schema.ts      # Placeholder for schema
+├── adapters/          # External services
+│   └── database.ts    # Neon database adapter with caching
+└── db/                # Database schema
+    └── schema.ts      # Drizzle schema definitions
 ```
 
 ## API Context
@@ -87,7 +88,7 @@ This marketplace API will serve:
 - **Authentication**: SMS OTP flow _(planned)_
 - **Core Features**: Users, products, orders, marketplace functionality _(planned)_
 
-**Currently implemented**: Health check endpoint at `/health`
+**Currently implemented**: Health check endpoint at `/health` with database connectivity
 
 ## Implementation Status
 
@@ -96,12 +97,13 @@ This marketplace API will serve:
 - Hono framework setup with Cloudflare Workers
 - Response utilities (`res.*` namespace)
 - Route registration system
-- Health check endpoint (`/health`)
+- Health check endpoint (`/health`) with database connectivity
 - Import aliases (`@/*`)
+- Database integration (Neon + Drizzle)
+- Global error handling (404s, unhandled errors)
 
 🚧 **Planned**:
 
-- Database integration (Neon + Drizzle)
 - SMS OTP authentication
 - User management
 - Marketplace features (products, orders)

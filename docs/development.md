@@ -25,6 +25,7 @@ return res.notFound(c, "User not found")
 return res.conflict(c, "Email already exists")
 return res.validationError(c, { field: "email", message: "Invalid format" })
 return res.internalError(c)
+return res.serviceUnavailable(c)
 
 // Paginated responses
 return res.paginated(c, users, { page: 1, limit: 10, total: 100, totalPages: 10 })
@@ -56,7 +57,7 @@ Handlers are organized as modules with exported functions:
 import { res } from "@/utils/response"
 import { Context } from "hono"
 
-export async function check(c: Context) {
+export const check = async (c: Context) => {
 	return res.ok(c, { status: "healthy" })
 }
 ```

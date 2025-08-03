@@ -31,7 +31,7 @@ interface ResponseOptions {
 
 // Response utilities for consistent API responses.
 // Use: `return res.ok(c, data)` for success, `return res.err(c, error)` for errors.
-// Error codes: "BAD_REQUEST", "UNAUTHORIZED", "FORBIDDEN", "NOT_FOUND", "CONFLICT", "VALIDATION_ERROR", "INTERNAL_ERROR"
+// Error codes: "BAD_REQUEST", "UNAUTHORIZED", "FORBIDDEN", "NOT_FOUND", "CONFLICT", "VALIDATION_ERROR", "INTERNAL_ERROR", "SERVICE_UNAVAILABLE"
 export const res = {
 	// Success responses
 	ok: <T>(c: Context, data: T, options: ResponseOptions = {}) => {
@@ -85,6 +85,9 @@ export const res = {
 
 	internalError: (c: Context, error = "Internal server error") =>
 		res.err(c, error, { status: 500, code: "INTERNAL_ERROR" }),
+
+	serviceUnavailable: (c: Context, error = "Service unavailable") =>
+		res.err(c, error, { status: 503, code: "SERVICE_UNAVAILABLE" }),
 
 	// Utility responses
 	paginated: <T>(

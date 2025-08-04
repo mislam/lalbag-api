@@ -7,22 +7,28 @@
 		"dev": "wrangler dev",
 		"dev:up": "docker compose up -d && pnpm dev",
 		"dev:down": "docker compose down",
-		"deploy": "wrangler deploy --minify",
-		"cf-typegen": "wrangler types --env-interface CloudflareBindings && prettier --write worker-configuration.d.ts",
+		"check": "tsc --noEmit",
 		"format": "prettier --write .",
 		"db:push": "drizzle-kit push",
-		"db:admin": "drizzle-kit studio"
+		"db:admin": "drizzle-kit studio",
+		"gen:cf-types": "wrangler types --env-interface CloudflareBindings && prettier --write worker-configuration.d.ts",
+		"gen:jwt-secret": "node scripts/generate-jwt-secret.js",
+		"deploy": "wrangler deploy --minify"
 	},
 	"dependencies": {
+		"@hono/zod-validator": "^0.7.2",
 		"@neondatabase/serverless": "^1.0.1",
+		"@paralleldrive/cuid2": "^2.2.2",
 		"drizzle-orm": "^0.44.4",
-		"hono": "^4.8.10"
+		"hono": "^4.8.10",
+		"zod": "^4.0.14"
 	},
 	"devDependencies": {
 		"dotenv": "^17.2.1",
 		"drizzle-kit": "^0.31.4",
 		"pg": "^8.16.3",
 		"prettier": "^3.6.2",
+		"typescript": "^5.9.2",
 		"wrangler": "^4.27.0"
 	}
 }

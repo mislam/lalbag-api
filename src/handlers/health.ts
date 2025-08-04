@@ -1,8 +1,8 @@
 import { checkDbHealth } from "@/adapters/database"
 import { res } from "@/utils/response"
-import { Context } from "hono"
+import { type Context, type Hono } from "hono"
 
-export const check = async (c: Context) => {
+const checkHealth = async (c: Context) => {
 	const dbHealth = await checkDbHealth(c)
 
 	if (!dbHealth.healthy) {
@@ -11,4 +11,8 @@ export const check = async (c: Context) => {
 	}
 
 	return res.ok(c, { status: "healthy" })
+}
+
+export const registerRoutes = (app: Hono) => {
+	app.get("/health", checkHealth)
 }

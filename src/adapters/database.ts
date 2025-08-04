@@ -1,13 +1,14 @@
+import { getEnv, isDev } from "@/utils/env"
 import { neon, neonConfig } from "@neondatabase/serverless"
 import { drizzle } from "drizzle-orm/neon-http"
-import { Context } from "hono"
+import { type Context } from "hono"
 
 // Cache database clients for performance
 const dbCache = new Map<string, ReturnType<typeof drizzle>>()
 
 // Utility function to get database client from context
-export const getDb = (c: Context<{ Bindings: CloudflareBindings }>): ReturnType<typeof drizzle> => {
-	const connectionString = c.env.DATABASE_URL
+export const getDb = (c: Context): ReturnType<typeof drizzle> => {
+	const connectionString = getEnv(c).DATABASE_URL
 	if (!connectionString) {
 		throw new Error("DATABASE_URL is not set in the environment variables")
 	}
@@ -18,7 +19,7 @@ export const getDb = (c: Context<{ Bindings: CloudflareBindings }>): ReturnType<
 
 	try {
 		// Configure Neon for local development
-		if ("development" === c.env.ENV) {
+		if (isDev(c)) {
 			neonConfig.fetchEndpoint = (host) => {
 				const [protocol, port] = host === "db.localtest.me" ? ["http", 4444] : ["https", 443]
 				return `${protocol}://${host}:${port}/sql`

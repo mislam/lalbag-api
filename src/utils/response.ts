@@ -1,4 +1,4 @@
-import { Context } from "hono"
+import { type Context } from "hono"
 import { StatusCode, type ContentfulStatusCode } from "hono/utils/http-status"
 
 // Response interfaces
@@ -30,10 +30,7 @@ interface ResponseOptions {
 }
 
 // Response utilities for consistent API responses.
-// Use: `return res.ok(c, data)` for success, `return res.err(c, error)` for errors.
-// Error codes: "BAD_REQUEST", "UNAUTHORIZED", "FORBIDDEN", "NOT_FOUND", "CONFLICT", "VALIDATION_ERROR", "INTERNAL_ERROR", "SERVICE_UNAVAILABLE"
 export const res = {
-	// Success responses
 	ok: <T>(c: Context, data: T, options: ResponseOptions = {}) => {
 		const response: SuccessResponse<T> = {
 			ok: true,
@@ -49,6 +46,22 @@ export const res = {
 		res.ok(c, data, { status: 201, message }),
 
 	noContent: (c: Context) => c.body(null, 204 as StatusCode),
+
+	paginated: <T>(
+		c: Context,
+		data: T[],
+		pagination: PaginationMeta,
+		options: ResponseOptions = {},
+	) => {
+		const reservedKeys = new Set(["pagination", "page", "limit", "total", "totalPages"])
+		if (options.meta && Object.keys(options.meta).some((key) => reservedKeys.has(key))) {
+			return res.err(c, "Pagination meta keys are reserved", {
+				status: 500,
+				code: "INTERNAL_ERROR",
+			})
+		}
+		return res.ok(c, data, { ...options, meta: { pagination, ...options.meta } })
+	},
 
 	err: (
 		c: Context,
@@ -83,28 +96,14 @@ export const res = {
 	validationError: (c: Context, details: unknown) =>
 		res.err(c, "Validation failed", { status: 422, code: "VALIDATION_ERROR", details }),
 
+	tooManyRequests: (c: Context, error = "Too many requests") =>
+		res.err(c, error, { status: 429, code: "TOO_MANY_REQUESTS" }),
+
 	internalError: (c: Context, error = "Internal server error") =>
 		res.err(c, error, { status: 500, code: "INTERNAL_ERROR" }),
 
 	serviceUnavailable: (c: Context, error = "Service unavailable") =>
 		res.err(c, error, { status: 503, code: "SERVICE_UNAVAILABLE" }),
-
-	// Utility responses
-	paginated: <T>(
-		c: Context,
-		data: T[],
-		pagination: PaginationMeta,
-		options: ResponseOptions = {},
-	) => {
-		const reservedKeys = new Set(["pagination", "page", "limit", "total", "totalPages"])
-		if (options.meta && Object.keys(options.meta).some((key) => reservedKeys.has(key))) {
-			return res.err(c, "Pagination meta keys are reserved", {
-				status: 500,
-				code: "INTERNAL_ERROR",
-			})
-		}
-		return res.ok(c, data, { ...options, meta: { pagination, ...options.meta } })
-	},
 }
 
 // Export types

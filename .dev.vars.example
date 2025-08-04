@@ -1,2 +1,6 @@
+# ENV is used for local development only
+# Omit this in production deployments
 ENV=development
+
 DATABASE_URL=postgres://postgres:postgres@db.localtest.me:5432/main
+JWT_SECRET=

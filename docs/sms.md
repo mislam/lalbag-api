@@ -1,4 +1,4 @@
-# BulkSMSBD API Documentation
+# Bulk SMS BD - API Documentation
 
 **Provider**: [Bulk SMS BD](https://bulksmsbd.com/) - Bangladesh SMS Gateway  
 **API Reference**: [Official Documentation](https://bulksmsbd.com/bulksms-api-bangladesh.php)
@@ -68,7 +68,7 @@
 
 | Parameter  | Required | Description                                         |
 | ---------- | -------- | --------------------------------------------------- |
-| `api_key`  | Yes      | Your unique API key from BulkSMSBD dashboard        |
+| `api_key`  | Yes      | Your unique API key from Bulk SMS BD dashboard      |
 | `senderid` | Yes      | Approved sender ID (e.g., 8809XXXXXXXXX)            |
 | `number`   | Yes      | Recipient number(s) with 880 country code prefix    |
 | `message`  | Yes      | SMS text content (URL encode special characters)    |
@@ -107,6 +107,7 @@
 - **SSL/TLS**: HTTPS is recommended; SSL verification can be disabled for local testing
 - **Rate Limits**: API enforces rate limits (see headers: `X-Ratelimit-Limit`, `X-Ratelimit-Remaining`)
 - **OTP Format**: Use standard format: `Your {Brand/Company Name} OTP is XXXX`
+- **Workers Integration**: In production, OTP SMS dispatch runs in the background via `waitUntil` to reduce API response latency.
 
 ## Examples
 
